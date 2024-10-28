@@ -1,5 +1,8 @@
-import { Message } from "ai"
+"use client"
 
+import { useChat } from "ai/react"
+
+import { useSkyfireAPIKey } from "@/lib/skyfire-sdk/context/context"
 import {
   Sidebar,
   SidebarContent,
@@ -10,19 +13,19 @@ import {
 import { ChatSidebar } from "./chat-sidebar"
 import { DisplaySection } from "./display-section"
 
-interface ChatLayoutProps {
-  messages: Message[]
-  input: string
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  handleSendMessage: (e: React.FormEvent) => void
-}
+export function ChatLayout() {
+  const { localAPIKey } = useSkyfireAPIKey()
 
-export function ChatLayout({
-  messages,
-  input,
-  handleInputChange,
-  handleSendMessage,
-}: ChatLayoutProps) {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } =
+    useChat({
+      api: "/api/chat",
+      headers: {
+        "skyfire-api-key": localAPIKey || "",
+      },
+    })
+
+  if (!localAPIKey) return null
+
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
       <SidebarProvider>
@@ -33,7 +36,8 @@ export function ChatLayout({
                 messages={messages}
                 input={input}
                 handleInputChange={handleInputChange}
-                handleSendMessage={handleSendMessage}
+                handleSubmit={handleSubmit}
+                isLoading={isLoading}
               />
             </SidebarContent>
           </Sidebar>
