@@ -46,11 +46,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <SkyfireProvider>
               <>
                 <div className="relative flex min-h-screen flex-col pb-20">
-                  <SiteHeader />
+                  {/* <SiteHeader /> */}
                   <SkyfireWidget />
                   <div className="flex-1">{children}</div>
                 </div>
-                <TailwindIndicator />
+                {/* <TailwindIndicator /> */}
               </>
             </SkyfireProvider>
           </ThemeProvider>
