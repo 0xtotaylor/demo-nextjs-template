@@ -1,5 +1,5 @@
-import React from "react"
-import { UseChatHelpers } from "ai/react/dist"
+import React from "react";
+import { UseChatHelpers } from "ai/react";
 
 import {
   Card,
@@ -7,26 +7,26 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import AIChatPanel from "../ai-agent/ai-chat-ui"
-import { updateSkyfireAPIKey } from "../context/action"
-import { useSkyfire, useSkyfireState } from "../context/context"
-import { usdAmount } from "../util"
-import { ClaimsWidget } from "./claims"
-import LogoutButton from "./logout"
-import { WalletDetailsPanel } from "./tab-balance-details"
+import AIChatPanel from "../ai-agent/ai-chat-ui";
+import { updateSkyfireAPIKey } from "../context/action";
+import { useSkyfire, useSkyfireState } from "../context/context";
+import { usdAmount } from "../util";
+import { ClaimsWidget } from "./claims";
+import LogoutButton from "./logout";
+import { WalletDetailsPanel } from "./tab-balance-details";
 
 interface WalletInterfaceProps {
-  aiChatProps: UseChatHelpers
-  errorMessage?: string | null
+  aiChatProps: UseChatHelpers;
+  errorMessage?: string | null;
 }
 export function WalletInterface({
   aiChatProps,
   errorMessage,
 }: WalletInterfaceProps) {
-  const { wallet, balance, claims } = useSkyfireState()
+  const { wallet, balance, claims } = useSkyfireState();
 
   return (
     <Card className="skyfire-theme md:max-w-full h-[calc(100vh-200px)] flex flex-col">
@@ -67,5 +67,5 @@ export function WalletInterface({
         </Tabs>
       </CardContent>
     </Card>
-  )
+  );
 }
