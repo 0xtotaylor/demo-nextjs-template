@@ -1,12 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 
 export function DisplaySection() {
   return (
     <div className="flex h-full flex-col">
-      <header className="border-b px-6 py-4">
-        <h1 className="text-2xl font-bold">Display</h1>
-      </header>
       <main className="flex-1 overflow-auto p-6">
         <Card>
           <CardHeader>
