@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { siteConfig } from "@/config/site";
+import SkyfireWidget from "@/lib/skyfire-sdk/components/skyfire-widget";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,7 +45,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="hidden md:block">
+            <SkyfireWidget tos={{ name: "Skyfire" }} />
+          </div>
+          {children}
+        </Providers>
       </body>
     </html>
   );

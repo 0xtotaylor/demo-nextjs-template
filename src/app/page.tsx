@@ -13,7 +13,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import SkyfireWidget from "@/lib/skyfire-sdk/components/skyfire-widget";
 
 export default function Home() {
   return (
@@ -45,7 +44,6 @@ export default function Home() {
           </div>
           <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
         </div>
-        <SkyfireWidget tos={{ name: "Skyfire" }} />
       </SidebarInset>
     </SidebarProvider>
   );
