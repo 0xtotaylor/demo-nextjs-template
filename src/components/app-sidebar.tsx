@@ -80,8 +80,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               key={message.id}
               className={`rounded-lg p-3 ${
                 message.role === "assistant"
-                  ? "bg-blue-50 text-blue-900"
-                  : "bg-gray-100 text-gray-900"
+                  ? "bg-[#f4f4f5] text-black"
+                  : "bg-[#0472fe] text-white"
               }`}
             >
               {message.content}
