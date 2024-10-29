@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { UseChatHelpers } from "ai/react";
 import { AxiosResponse } from "axios";
@@ -160,7 +160,7 @@ export default function AIChatUI({
           </div>
           {filteredMessages.map((message, index) => {
             return (
-              <React.Fragment key={message.id}>
+              <>
                 <ChatBlob message={message} />
                 {message.toolInvocations?.map((tool) => {
                   const toolKey = `${message.id}-${
@@ -217,7 +217,6 @@ export default function AIChatUI({
                     console.log("Found Vertic tool invocation:", tool);
                     if (tool.state === "result" && tool.result) {
                       const parsedResult = JSON.parse(tool.result.content);
-                      console.log("Parsed Vertic result:", parsedResult);
                       return (
                         <VerticHTTPTool.ClientComponent
                           key={toolKey}
@@ -229,7 +228,7 @@ export default function AIChatUI({
 
                   return null;
                 })}
-              </React.Fragment>
+              </>
             );
           })}
           {isLoading && (
