@@ -1,5 +1,6 @@
 "use client";
 
+import { URLProvider } from "@/lib/context/url-context";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SkyfireProvider } from "@/lib/skyfire-sdk/context/context";
 
@@ -11,7 +12,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       enableSystem
       disableTransitionOnChange
     >
-      <SkyfireProvider>{children}</SkyfireProvider>
+      <SkyfireProvider>
+        <URLProvider>{children}</URLProvider>
+      </SkyfireProvider>
     </ThemeProvider>
   );
 }
