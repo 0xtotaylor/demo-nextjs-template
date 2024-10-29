@@ -1,5 +1,5 @@
+import { streamText } from "ai";
 import { NextResponse } from "next/server";
-import { streamText, StreamData } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
 import {
@@ -34,9 +34,6 @@ export async function POST(req: Request) {
 
   try {
     const tools = createTools(SKYFIRE_ENDPOINT_URL, apiKey);
-    const data = new StreamData();
-
-    data.append({ toolsInitialized: true });
 
     const instruction = {
       role: "system",
@@ -47,30 +44,15 @@ export async function POST(req: Request) {
       model: skyfireWithOpenAI("gpt-4o"),
       messages: [instruction, ...messages],
       tools,
+      maxSteps: 5,
       temperature: 0.7,
-      // onChunk: (chunk) => {
-      //   console.log(chunk);
-      // },
-      async onToolCall({ tool, args }) {
-        try {
-          const toolResult = await tools[tool].execute(args);
-          data.append({
-            toolName: tool,
-            toolResult,
-          });
-          return toolResult;
-        } catch (error) {
-          console.error("Tool execution error:", error);
-          throw error;
-        }
-      },
-      onFinish() {
-        data.append({ status: "completed" });
-        data.close();
+      onStepFinish({ toolCalls, toolResults }) {
+        console.log("toolCalls", toolCalls);
+        console.log("toolResults", toolResults);
       },
     });
 
-    return result.toDataStreamResponse({ data });
+    return result.toDataStreamResponse();
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(
