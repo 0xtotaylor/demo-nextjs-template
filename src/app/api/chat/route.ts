@@ -45,6 +45,10 @@ export async function POST(req: Request) {
       model: skyfireWithOpenAI("gpt-4o"),
       messages: [instruction, ...messages],
       tools,
+      temperature: 0.7,
+      onChunk: (chunk) => {
+        console.log(chunk);
+      },
     });
 
     // Return the streaming response
