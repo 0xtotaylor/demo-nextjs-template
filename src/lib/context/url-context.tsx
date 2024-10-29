@@ -1,11 +1,10 @@
-// Create a new file: lib/context/url-context.tsx
-
 import React, { createContext, useContext, useState, useCallback } from "react";
 
 interface URLContextType {
   urls: string[];
   addURL: (url: string) => void;
   clearURLs: () => void;
+  extractURLs: (text: string) => void;
 }
 
 const URLContext = createContext<URLContextType | undefined>(undefined);
@@ -24,8 +23,31 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
     setUrls([]);
   }, []);
 
+  const extractURLs = useCallback((text: string) => {
+    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
+    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+
+    const extractedUrls = new Set<string>();
+
+    let match;
+    while ((match = markdownLinkRegex.exec(text)) !== null) {
+      const url = match[2];
+      extractedUrls.add(url);
+    }
+
+    const textWithoutMarkdownLinks = text.replace(markdownLinkRegex, "");
+    while ((match = urlRegex.exec(textWithoutMarkdownLinks)) !== null) {
+      extractedUrls.add(match[1]);
+    }
+
+    setUrls((prev) => {
+      const newUrls = [...extractedUrls].filter((url) => !prev.includes(url));
+      return [...prev, ...newUrls];
+    });
+  }, []);
+
   return (
-    <URLContext.Provider value={{ urls, addURL, clearURLs }}>
+    <URLContext.Provider value={{ urls, addURL, clearURLs, extractURLs }}>
       {children}
     </URLContext.Provider>
   );
