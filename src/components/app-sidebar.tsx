@@ -34,6 +34,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           content: "Hello! How can I assist you today?",
         },
       ],
+      onFinish: (message) => {
+        console.log("Final message:", message.content);
+      },
     });
 
   React.useEffect(() => {
