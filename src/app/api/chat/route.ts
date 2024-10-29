@@ -48,9 +48,6 @@ export async function POST(req: Request) {
       messages: [instruction, ...messages],
       tools,
       temperature: 0.7,
-      onChunk: (chunk) => {
-        console.log(chunk);
-      },
       async onToolCall({ tool, args }) {
         try {
           const toolResult = await tools[tool].execute(args);
