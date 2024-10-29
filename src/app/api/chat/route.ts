@@ -36,7 +36,6 @@ export async function POST(req: Request) {
     const tools = createTools(SKYFIRE_ENDPOINT_URL, apiKey);
     const data = new StreamData();
 
-    // Initialize stream data
     data.append({ toolsInitialized: true });
 
     const instruction = {
@@ -49,10 +48,12 @@ export async function POST(req: Request) {
       messages: [instruction, ...messages],
       tools,
       temperature: 0.7,
+      onChunk: (chunk) => {
+        console.log(chunk);
+      },
       async onToolCall({ tool, args }) {
         try {
           const toolResult = await tools[tool].execute(args);
-          // Append tool result to stream
           data.append({
             toolName: tool,
             toolResult,
@@ -64,14 +65,11 @@ export async function POST(req: Request) {
         }
       },
       onFinish() {
-        // Append completion message
         data.append({ status: "completed" });
-        // Close the stream
         data.close();
       },
     });
 
-    // Return the streaming response with data
     return result.toDataStreamResponse({ data });
   } catch (error) {
     console.error("Error:", error);
