@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { streamText, StreamData } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText } from "ai";
 
 import {
   createTools,
@@ -25,7 +25,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Use OpenAI Provider, but replace the base URL with the Skyfire endpoint
   const skyfireWithOpenAI = createOpenAI({
     baseURL: `${SKYFIRE_ENDPOINT_URL}/proxy/openai/v1`,
     headers: {
@@ -35,6 +34,10 @@ export async function POST(req: Request) {
 
   try {
     const tools = createTools(SKYFIRE_ENDPOINT_URL, apiKey);
+    const data = new StreamData();
+
+    // Initialize stream data
+    data.append({ toolsInitialized: true });
 
     const instruction = {
       role: "system",
@@ -46,13 +49,30 @@ export async function POST(req: Request) {
       messages: [instruction, ...messages],
       tools,
       temperature: 0.7,
-      onChunk: (chunk) => {
-        console.log(chunk);
+      async onToolCall({ tool, args }) {
+        try {
+          const toolResult = await tools[tool].execute(args);
+          // Append tool result to stream
+          data.append({
+            toolName: tool,
+            toolResult,
+          });
+          return toolResult;
+        } catch (error) {
+          console.error("Tool execution error:", error);
+          throw error;
+        }
+      },
+      onFinish() {
+        // Append completion message
+        data.append({ status: "completed" });
+        // Close the stream
+        data.close();
       },
     });
 
-    // Return the streaming response
-    return result.toDataStreamResponse();
+    // Return the streaming response with data
+    return result.toDataStreamResponse({ data });
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json(
