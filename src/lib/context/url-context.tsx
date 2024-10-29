@@ -1,16 +1,35 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { generateObject } from "ai";
+import { z } from "zod";
 
 interface URLContextType {
   urls: string[];
   addURL: (url: string) => void;
   clearURLs: () => void;
-  extractURLs: (text: string) => void;
+  extractURLs: (text: string) => Promise<void>;
+  isExtracting: boolean;
 }
+
+const urlExtractionSchema = z.object({
+  urls: z.array(
+    z.object({
+      url: z.string().url(),
+      context: z.string().optional(),
+    })
+  ),
+});
 
 const URLContext = createContext<URLContextType | undefined>(undefined);
 
-export function URLProvider({ children }: { children: React.ReactNode }) {
+export function URLProvider({
+  children,
+  model,
+}: {
+  children: React.ReactNode;
+  model: any;
+}) {
   const [urls, setUrls] = useState<string[]>([]);
+  const [isExtracting, setIsExtracting] = useState(false);
 
   const addURL = useCallback((url: string) => {
     setUrls((prev) => {
@@ -23,31 +42,58 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
     setUrls([]);
   }, []);
 
-  const extractURLs = useCallback((text: string) => {
-    const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
-    const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+  const extractURLs = useCallback(
+    async (text: string) => {
+      try {
+        setIsExtracting(true);
 
-    const extractedUrls = new Set<string>();
+        const { object } = await generateObject({
+          model,
+          schema: urlExtractionSchema,
+          prompt: `Extract all URLs from the following text. Include both regular URLs and URLs from markdown links. For each URL, provide some brief context about what it links to based on the surrounding text: ${text}`,
+        });
 
-    let match;
-    while ((match = markdownLinkRegex.exec(text)) !== null) {
-      const url = match[2];
-      extractedUrls.add(url);
-    }
+        setUrls((prev) => {
+          const newUrls = object.urls
+            .map((item) => item.url)
+            .filter((url) => !prev.includes(url));
+          return [...prev, ...newUrls];
+        });
+      } catch (error) {
+        console.error("Error extracting URLs:", error);
 
-    const textWithoutMarkdownLinks = text.replace(markdownLinkRegex, "");
-    while ((match = urlRegex.exec(textWithoutMarkdownLinks)) !== null) {
-      extractedUrls.add(match[1]);
-    }
+        const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
+        const urlRegex = /(https?:\/\/[^\s\)]+)/g;
+        const extractedUrls = new Set<string>();
 
-    setUrls((prev) => {
-      const newUrls = [...extractedUrls].filter((url) => !prev.includes(url));
-      return [...prev, ...newUrls];
-    });
-  }, []);
+        let match;
+        while ((match = markdownLinkRegex.exec(text)) !== null) {
+          const url = match[2];
+          extractedUrls.add(url);
+        }
+
+        const textWithoutMarkdownLinks = text.replace(markdownLinkRegex, "");
+        while ((match = urlRegex.exec(textWithoutMarkdownLinks)) !== null) {
+          extractedUrls.add(match[1]);
+        }
+
+        setUrls((prev) => {
+          const newUrls = [...extractedUrls].filter(
+            (url) => !prev.includes(url)
+          );
+          return [...prev, ...newUrls];
+        });
+      } finally {
+        setIsExtracting(false);
+      }
+    },
+    [model]
+  );
 
   return (
-    <URLContext.Provider value={{ urls, addURL, clearURLs, extractURLs }}>
+    <URLContext.Provider
+      value={{ urls, addURL, clearURLs, extractURLs, isExtracting }}
+    >
       {children}
     </URLContext.Provider>
   );
