@@ -46,10 +46,10 @@ export async function POST(req: Request) {
       tools,
       maxSteps: 5,
       temperature: 0.7,
-      onStepFinish({ toolCalls, toolResults }) {
-        console.log("toolCalls", toolCalls);
-        console.log("toolResults", toolResults);
-      },
+      // onStepFinish({ toolCalls, toolResults }) {
+      //   console.log("toolCalls", toolCalls);
+      //   console.log("toolResults", toolResults);
+      // },
     });
 
     return result.toDataStreamResponse();
