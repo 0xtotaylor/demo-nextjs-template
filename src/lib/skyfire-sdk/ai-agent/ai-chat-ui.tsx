@@ -174,9 +174,7 @@ export default function AIChatUI({
                         images={tool.args.images}
                       />
                     );
-                  }
-
-                  if (tool.toolName === ComposeEmailTool.toolName) {
+                  } else if (tool.toolName === ComposeEmailTool.toolName) {
                     return (
                       <ComposeEmailTool.ClientComponent
                         key={toolKey}
@@ -206,9 +204,7 @@ export default function AIChatUI({
                         }}
                       />
                     );
-                  }
-
-                  if (tool.toolName === SendEmailTool.toolName) {
+                  } else if (tool.toolName === SendEmailTool.toolName) {
                     if (tool.state === "result" && tool.result) {
                       return (
                         <SendEmailTool.ClientComponent
@@ -217,9 +213,7 @@ export default function AIChatUI({
                         />
                       );
                     }
-                  }
-
-                  if (tool.toolName === VerticHTTPTool.toolName) {
+                  } else if (tool.toolName === VerticHTTPTool.toolName) {
                     console.log("Found Vertic tool invocation:", tool);
                     if (tool.state === "result" && tool.result) {
                       const parsedResult = JSON.parse(tool.result.content);
