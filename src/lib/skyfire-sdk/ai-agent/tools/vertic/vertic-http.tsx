@@ -1,8 +1,9 @@
 import React from "react";
 import { z } from "zod";
 import axios from "axios";
-import { BaseTool } from "../basetool.class";
+
 import { Component } from "./component";
+import { BaseTool } from "../basetool.class";
 import { verticSchema } from "@/constants/schema";
 
 type HTTPMethod = "get" | "post";
@@ -55,7 +56,7 @@ class VerticHTTPTool extends BaseTool {
     this.operations = this.parseSchema(verticSchema);
   }
 
-  private resolveBaseUrl(schema: OpenAPISchema): string {
+  private resolveBaseUrl(schema: any): string {
     if (schema.servers && schema.servers.length > 0) {
       const serverUrl = schema.servers[0].url;
       if (
@@ -97,7 +98,7 @@ class VerticHTTPTool extends BaseTool {
     return { service, endpoint };
   }
 
-  private parseSchema(schema: OpenAPISchema): Map<string, Operation> {
+  private parseSchema(schema: any): Map<string, Operation> {
     const operations = new Map<string, Operation>();
 
     Object.entries(schema.paths).forEach(([path, pathObj]) => {
@@ -219,7 +220,6 @@ class VerticHTTPTool extends BaseTool {
             }),
           };
         } catch (error) {
-          console.error("API Request Error:", error);
           return {
             role: "function",
             name: VerticHTTPTool.toolName,
