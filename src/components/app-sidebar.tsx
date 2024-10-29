@@ -15,9 +15,11 @@ import {
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useURLs } from "@/lib/context/url-context";
 import { useSkyfireAPIKey } from "@/lib/skyfire-sdk/context/context";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { extractURLs } = useURLs();
   const { localAPIKey } = useSkyfireAPIKey();
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
 
@@ -35,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         },
       ],
       onFinish: (message) => {
-        console.log("Final message:", message.content);
+        extractURLs(message.content);
       },
     });
 
