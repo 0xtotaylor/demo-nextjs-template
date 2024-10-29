@@ -5,7 +5,7 @@ export const verticSchema = {
       url: "{baseUrl}",
       variables: {
         baseUrl: {
-          default: "https://api.skyfire.xyz/v1/receivers/vetric",
+          default: "https://api-qa.skyfire.xyz/v1/receivers/vetric",
         },
       },
     },
