@@ -1,28 +1,33 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from "react"
-import { usePathname } from "next/navigation"
-import { UseChatHelpers } from "ai/react"
-import { AxiosResponse } from "axios"
-import { AlertCircle, ChevronDown } from "lucide-react"
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { UseChatHelpers } from "ai/react";
+import { AxiosResponse } from "axios";
+import { AlertCircle, ChevronDown } from "lucide-react";
 
 import {
   getItemNamesFromResponse,
   useSkyfireResponses,
-} from "@/lib/skyfire-sdk/context/context"
-import { addDatasets } from "@/lib/skyfire-sdk/hooks"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
+} from "@/lib/skyfire-sdk/context/context";
+import { addDatasets } from "@/lib/skyfire-sdk/hooks";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 
-import ChatBlob from "./chat-blob"
-import { ComposeEmailTool, SendEmailTool, ShowImagesTool } from "./tools"
+import ChatBlob from "./chat-blob";
+import {
+  ComposeEmailTool,
+  SendEmailTool,
+  ShowImagesTool,
+  VerticHTTPTool,
+} from "./tools";
 
 interface AIChatPanelProps {
-  aiChatProps: UseChatHelpers
-  errorMessage?: string | null
+  aiChatProps: UseChatHelpers;
+  errorMessage?: string | null;
 }
 
 export default function AIChatUI({
@@ -37,69 +42,71 @@ export default function AIChatUI({
     setMessages,
     isLoading,
     setInput,
-  } = aiChatProps
-  const path = usePathname()
-  const responses = useSkyfireResponses(path)
-  const formRef = useRef<HTMLFormElement>(null)
+  } = aiChatProps;
+  const path = usePathname();
+  const responses = useSkyfireResponses(path);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const quickPrompts = useMemo(() => {
     return new Set<string>(
       responses.reduce((arr: string[], res: AxiosResponse) => {
-        return [...arr, ...(res.config.metadataForAgent?.customPrompts || [])]
+        return [...arr, ...(res.config.metadataForAgent?.customPrompts || [])];
       }, [])
-    )
-  }, [responses])
+    );
+  }, [responses]);
 
-  const chatContainerRef = useRef<HTMLDivElement>(null)
-  const cardRef = useRef<HTMLDivElement>(null)
-  const [showScrollButton, setShowScrollButton] = useState(false)
-  const [showQuickPrompts, setShowQuickPrompts] = useState(true)
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  const [showQuickPrompts, setShowQuickPrompts] = useState(true);
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
-  }
+  };
 
   const handleScroll = () => {
     if (chatContainerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current
-      const bottomThreshold = 100
+      const { scrollTop, scrollHeight, clientHeight } =
+        chatContainerRef.current;
+      const bottomThreshold = 100;
       setShowScrollButton(
         scrollHeight - scrollTop - clientHeight > bottomThreshold
-      )
+      );
     }
-  }
+  };
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
-    const chatContainer = chatContainerRef.current
+    const chatContainer = chatContainerRef.current;
     if (chatContainer) {
-      chatContainer.addEventListener("scroll", handleScroll)
-      return () => chatContainer.removeEventListener("scroll", handleScroll)
+      chatContainer.addEventListener("scroll", handleScroll);
+      return () => chatContainer.removeEventListener("scroll", handleScroll);
     }
-  }, [])
+  }, []);
 
   const handleManualSubmit = (prompt: string) => {
     const event = {
       target: { value: prompt },
-    } as React.ChangeEvent<HTMLInputElement>
-    handleInputChange(event)
+    } as React.ChangeEvent<HTMLInputElement>;
+    handleInputChange(event);
     setTimeout(() => {
       if (formRef.current) {
-        formRef.current.requestSubmit()
+        formRef.current.requestSubmit();
       }
-    }, 0)
-  }
+    }, 0);
+  };
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    addDatasets(responses, messages, setMessages)
-    handleSubmit(e)
-  }
+    e.preventDefault();
+    addDatasets(responses, messages, setMessages);
+    handleSubmit(e);
+  };
 
   const filteredMessages = messages.filter((message) => {
     if (
@@ -108,9 +115,9 @@ export default function AIChatUI({
           message.content.startsWith("<Email>"))) ||
       message.id === "instruction"
     )
-      return false
-    return true
-  })
+      return false;
+    return true;
+  });
 
   return (
     <Card
@@ -135,8 +142,8 @@ export default function AIChatUI({
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {responses.map((response) => {
-                    const url = response.config.url
-                    if (!url) return null
+                    const url = response.config.url;
+                    if (!url) return null;
                     return (
                       <Badge
                         key={response.config.url}
@@ -145,7 +152,7 @@ export default function AIChatUI({
                       >
                         {getItemNamesFromResponse(response)}
                       </Badge>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -153,18 +160,26 @@ export default function AIChatUI({
           </div>
           {filteredMessages.map((message, index) => {
             return (
-              <>
+              <React.Fragment key={message.id}>
                 <ChatBlob message={message} />
                 {message.toolInvocations?.map((tool) => {
+                  const toolKey = `${message.id}-${
+                    tool.toolName
+                  }-${Math.random()}`;
+
                   if (tool.toolName === ShowImagesTool.toolName) {
                     return (
                       <ShowImagesTool.ClientComponent
+                        key={toolKey}
                         images={tool.args.images}
                       />
-                    )
-                  } else if (tool.toolName === ComposeEmailTool.toolName) {
+                    );
+                  }
+
+                  if (tool.toolName === ComposeEmailTool.toolName) {
                     return (
                       <ComposeEmailTool.ClientComponent
+                        key={toolKey}
                         initialData={{
                           to: tool.args.to,
                           subject: tool.args.subject,
@@ -172,9 +187,9 @@ export default function AIChatUI({
                         }}
                         disabled={index !== filteredMessages.length - 1}
                         onSubmit={async (args: {
-                          to: string
-                          subject: string
-                          body: string
+                          to: string;
+                          subject: string;
+                          body: string;
                         }) => {
                           setMessages([
                             ...messages,
@@ -183,26 +198,45 @@ export default function AIChatUI({
                               role: "user",
                               content: `<Email>${JSON.stringify(args)}`,
                             },
-                          ])
-                          handleManualSubmit(`Email to ${args.to}`)
+                          ]);
+                          handleManualSubmit(`Email to ${args.to}`);
                         }}
                         onCancel={() => {
-                          console.log("cancel")
+                          console.log("cancel");
                         }}
                       />
-                    )
-                  } else if (tool.toolName === SendEmailTool.toolName) {
+                    );
+                  }
+
+                  if (tool.toolName === SendEmailTool.toolName) {
                     if (tool.state === "result" && tool.result) {
                       return (
                         <SendEmailTool.ClientComponent
+                          key={toolKey}
                           result={JSON.parse(tool.result.content)}
                         />
-                      )
+                      );
                     }
                   }
+
+                  if (tool.toolName === VerticHTTPTool.toolName) {
+                    console.log("Found Vertic tool invocation:", tool);
+                    if (tool.state === "result" && tool.result) {
+                      const parsedResult = JSON.parse(tool.result.content);
+                      console.log("Parsed Vertic result:", parsedResult);
+                      return (
+                        <VerticHTTPTool.ClientComponent
+                          key={toolKey}
+                          result={parsedResult}
+                        />
+                      );
+                    }
+                  }
+
+                  return null;
                 })}
-              </>
-            )
+              </React.Fragment>
+            );
           })}
           {isLoading && (
             <div className="flex justify-start items-start mb-4">
@@ -250,8 +284,8 @@ export default function AIChatUI({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setShowQuickPrompts(false)
-                  handleManualSubmit(prompt)
+                  setShowQuickPrompts(false);
+                  handleManualSubmit(prompt);
                 }}
               >
                 {prompt}
@@ -280,5 +314,5 @@ export default function AIChatUI({
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
