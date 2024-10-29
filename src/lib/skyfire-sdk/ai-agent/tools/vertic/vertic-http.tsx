@@ -5,33 +5,22 @@ import { BaseTool } from "../basetool.class";
 import { Component } from "./component";
 import { verticSchema } from "@/constants/schema";
 
-type OpenAPISchema = {
-  openapi: string;
-  servers: Array<{
-    url: string;
-    variables?: {
-      baseUrl?: {
-        default: string;
-      };
-    };
-  }>;
-  paths: {
-    [key: string]: OpenAPIPath;
+type HTTPMethod = "get" | "post";
+
+type Parameter = {
+  name: string;
+  in: string;
+  required: boolean;
+  schema: {
+    type: string;
   };
+  description: string;
 };
 
 type OpenAPIPath = {
-  get?: {
+  [key in HTTPMethod]?: {
     deprecated: boolean;
-    parameters: Array<{
-      name: string;
-      in: string;
-      required: boolean;
-      schema: {
-        type: string;
-      };
-      description: string;
-    }>;
+    parameters: Parameter[];
     description: string;
     operationId: string;
   };
@@ -39,13 +28,14 @@ type OpenAPIPath = {
 
 type Operation = {
   path: string;
-  method: string;
+  method: HTTPMethod;
   operationId: string;
   description: string;
   service: string;
   endpoint: string;
   parameters: Array<{
     name: string;
+    in: string;
     required: boolean;
     type: string;
     description: string;
@@ -113,56 +103,54 @@ class VerticHTTPTool extends BaseTool {
     Object.entries(schema.paths).forEach(([path, pathObj]) => {
       const pathDef = pathObj as OpenAPIPath;
 
-      if (pathDef.get && !pathDef.get.deprecated) {
-        const { service, endpoint } = this.parsePath(path);
+      ["get", "post"].forEach((method) => {
+        const methodDef = pathDef[method as HTTPMethod];
+        if (methodDef && !methodDef.deprecated) {
+          const { service, endpoint } = this.parsePath(path);
 
-        const operation: Operation = {
-          path,
-          method: "get",
-          operationId: pathDef.get.operationId,
-          description: pathDef.get.description,
-          service,
-          endpoint,
-          parameters: pathDef.get.parameters.map((param) => ({
-            name: param.name,
-            required: param.required,
-            type: param.schema.type,
-            description: param.description,
-          })),
-        };
+          const operation: Operation = {
+            path,
+            method: method as HTTPMethod,
+            operationId: methodDef.operationId,
+            description: methodDef.description,
+            service,
+            endpoint,
+            parameters: methodDef.parameters.map((param) => ({
+              name: param.name,
+              in: param.in,
+              required: param.required,
+              type: param.schema.type,
+              description: param.description,
+            })),
+          };
 
-        const operationName = this.generateOperationName(service, endpoint);
-        operations.set(operationName, operation);
-      }
+          const operationName = this.generateOperationName(
+            service,
+            endpoint,
+            method as HTTPMethod
+          );
+          operations.set(operationName, operation);
+        }
+      });
     });
 
     return operations;
   }
 
-  private generateOperationName(service: string, endpoint: string): string {
+  private generateOperationName(
+    service: string,
+    endpoint: string,
+    method: HTTPMethod
+  ): string {
     const cleanService = service.charAt(0).toUpperCase() + service.slice(1);
-
     const endpointParts = endpoint.split("/").filter(Boolean);
     const cleanEndpoint = endpointParts
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join("");
 
-    return `fetch${cleanService}${cleanEndpoint}`;
+    const methodPrefix = method === "post" ? "post" : "fetch";
+    return `${methodPrefix}${cleanService}${cleanEndpoint}`;
   }
-
-  public static override readonly instruction = `
-    To fetch data using the Vertic API, you can use the following operations:
-    ${Array.from(
-      new VerticHTTPTool({
-        SKYFIRE_ENDPOINT_URL: "",
-        apiKey: "",
-      }).operations.keys()
-    )
-      .map((op) => `- ${op}`)
-      .join("\n")}
-    
-    Each operation requires a query parameter.
-  `;
 
   private formatRequestURL(operationConfig: Operation): string {
     const url = new URL(operationConfig.path, this.baseUrl);
@@ -175,7 +163,7 @@ class VerticHTTPTool extends BaseTool {
     );
 
     return this.createBaseTool(
-      "Make Vertic API calls to fetch data",
+      "Make Vertic API calls to fetch or post data",
       z.object({
         operation: OperationEnum,
         query: z.string(),
@@ -188,7 +176,22 @@ class VerticHTTPTool extends BaseTool {
           }
 
           const endpoint = this.formatRequestURL(operationConfig);
-          console.log(`Making request to: ${endpoint}`);
+          console.log(
+            `Making ${operationConfig.method.toUpperCase()} request to: ${endpoint}`
+          );
+
+          const queryParams: Record<string, string> = {};
+          const bodyParams: Record<string, string> = {};
+
+          operationConfig.parameters.forEach((param) => {
+            if (param.required) {
+              if (param.in === "query") {
+                queryParams[param.name] = query;
+              } else {
+                bodyParams[param.name] = query;
+              }
+            }
+          });
 
           const response = await axios({
             method: operationConfig.method,
@@ -197,7 +200,9 @@ class VerticHTTPTool extends BaseTool {
               "Content-Type": "application/json",
               "skyfire-api-key": this.apiKey,
             },
-            params: { query },
+            params:
+              Object.keys(queryParams).length > 0 ? queryParams : undefined,
+            data: Object.keys(bodyParams).length > 0 ? bodyParams : undefined,
           });
 
           return {
@@ -206,6 +211,7 @@ class VerticHTTPTool extends BaseTool {
             content: JSON.stringify({
               success: true,
               operation,
+              method: operationConfig.method,
               service: operationConfig.service,
               endpoint: operationConfig.endpoint,
               query,
@@ -213,6 +219,7 @@ class VerticHTTPTool extends BaseTool {
             }),
           };
         } catch (error) {
+          console.error("API Request Error:", error);
           return {
             role: "function",
             name: VerticHTTPTool.toolName,
@@ -228,10 +235,25 @@ class VerticHTTPTool extends BaseTool {
     );
   }
 
+  public static override readonly instruction = `
+    To interact with the Vertic API, you can use the following operations:
+    ${Array.from(
+      new VerticHTTPTool({
+        SKYFIRE_ENDPOINT_URL: "",
+        apiKey: "",
+      }).operations.keys()
+    )
+      .map((op) => `- ${op}`)
+      .join("\n")}
+    
+    Each operation requires a query parameter. The operation name indicates whether it's a GET (fetch*) or POST (post*) request.
+  `;
+
   public static override ClientComponent: React.FC<{
     result: {
       success: boolean;
       operation: string;
+      method?: string;
       service?: string;
       endpoint?: string;
       query: string;
