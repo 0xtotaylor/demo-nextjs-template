@@ -177,9 +177,6 @@ class VerticHTTPTool extends BaseTool {
           }
 
           const endpoint = this.formatRequestURL(operationConfig);
-          console.log(
-            `Making ${operationConfig.method.toUpperCase()} request to: ${endpoint}`
-          );
 
           const queryParams: Record<string, string> = {};
           const bodyParams: Record<string, string> = {};
