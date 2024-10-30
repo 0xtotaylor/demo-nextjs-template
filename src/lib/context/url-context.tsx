@@ -14,6 +14,10 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
   const [urls, setUrls] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
 
+  /**
+   * Adds a new URL to the list if it doesn't already exist.
+   * @param url - The URL to be added.
+   */
   const addURL = useCallback((url: string) => {
     setUrls((prev) => {
       if (prev.includes(url)) return prev;
@@ -21,10 +25,17 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  /**
+   * Clears all URLs from the list.
+   */
   const clearURLs = useCallback(() => {
     setUrls([]);
   }, []);
 
+  /**
+   * Extracts URLs from the given text using various patterns.
+   * @param text - The input text to extract URLs from.
+   */
   const extractURLs = useCallback((text: string) => {
     try {
       setIsExtracting(true);
@@ -73,6 +84,11 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+/**
+ * Custom hook to access the URL context.
+ * @returns The URL context containing urls, addURL, clearURLs, extractURLs, and isExtracting.
+ * @throws Error if used outside of a URLProvider.
+ */
 export function useURLs() {
   const context = useContext(URLContext);
   if (context === undefined) {
