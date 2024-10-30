@@ -18,9 +18,11 @@ export function AppTiles() {
     if (urls.length === 0) {
       return (
         <>
-          <div className="aspect-video rounded-xl bg-muted/50 animate-pulse" />
-          <div className="aspect-video rounded-xl bg-muted/50 animate-pulse" />
-          <div className="aspect-video rounded-xl bg-muted/50 animate-pulse" />
+          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
+          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
+          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
+          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
+          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
         </>
       );
     }
@@ -31,7 +33,7 @@ export function AppTiles() {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="group relative aspect-video overflow-hidden rounded-xl bg-muted/50 transition-all hover:bg-muted/70"
+        className="group relative aspect-square overflow-hidden rounded-lg bg-muted/50 transition-all hover:bg-muted/70"
       >
         {isImageURL(url) ? (
           <Image
@@ -42,14 +44,14 @@ export function AppTiles() {
             className="transition-opacity group-hover:opacity-80"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="flex items-center gap-2 text-sm font-medium opacity-70 transition-opacity group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-center justify-center p-2">
+            <div className="flex items-center gap-1 text-xs font-medium opacity-70 transition-opacity group-hover:opacity-100">
               {isImageURL(url) ? (
-                <ImageIcon className="h-4 w-4" />
+                <ImageIcon className="h-3 w-3" />
               ) : (
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-3 w-3" />
               )}
-              {new URL(url).hostname}
+              <span className="truncate">{new URL(url).hostname}</span>
             </div>
           </div>
         )}
@@ -59,7 +61,7 @@ export function AppTiles() {
 
   return (
     <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+      <div className="grid auto-rows-min gap-2 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {renderURLTiles()}
       </div>
     </div>
