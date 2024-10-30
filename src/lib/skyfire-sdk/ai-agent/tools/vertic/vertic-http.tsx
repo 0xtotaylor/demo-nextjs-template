@@ -56,6 +56,11 @@ class VerticHTTPTool extends BaseTool {
     this.operations = this.parseSchema(verticSchema);
   }
 
+  /**
+   * Resolves the base URL from the OpenAPI schema.
+   * @param schema - The OpenAPI schema object.
+   * @returns The resolved base URL as a string.
+   */
   private resolveBaseUrl(schema: any): string {
     if (schema.servers && schema.servers.length > 0) {
       const serverUrl = schema.servers[0].url;
@@ -73,6 +78,11 @@ class VerticHTTPTool extends BaseTool {
     return this.baseUrl;
   }
 
+  /**
+   * Parses the path to extract service and endpoint information.
+   * @param path - The API path to parse.
+   * @returns An object containing the service and endpoint.
+   */
   private parsePath(path: string): { service: string; endpoint: string } {
     const segments = path.split("/").filter(Boolean);
 
@@ -98,6 +108,11 @@ class VerticHTTPTool extends BaseTool {
     return { service, endpoint };
   }
 
+  /**
+   * Parses the OpenAPI schema to extract operations.
+   * @param schema - The OpenAPI schema object.
+   * @returns A Map of operation names to Operation objects.
+   */
   private parseSchema(schema: any): Map<string, Operation> {
     const operations = new Map<string, Operation>();
 
@@ -138,6 +153,13 @@ class VerticHTTPTool extends BaseTool {
     return operations;
   }
 
+  /**
+   * Generates an operation name based on the service, endpoint, and HTTP method.
+   * @param service - The name of the service.
+   * @param endpoint - The API endpoint.
+   * @param method - The HTTP method (GET or POST).
+   * @returns A string representing the generated operation name.
+   */
   private generateOperationName(
     service: string,
     endpoint: string,
@@ -153,11 +175,20 @@ class VerticHTTPTool extends BaseTool {
     return `${methodPrefix}${cleanService}${cleanEndpoint}`;
   }
 
+  /**
+   * Formats the request URL for a given operation.
+   * @param operationConfig - The Operation object.
+   * @returns The formatted request URL as a string.
+   */
   private formatRequestURL(operationConfig: Operation): string {
     const url = new URL(operationConfig.path, this.baseUrl);
     return url.toString();
   }
 
+  /**
+   * Creates and returns the Vertic HTTP tool.
+   * @returns A function that handles Vertic API calls.
+   */
   public override createTool() {
     const OperationEnum = z.enum(
       Array.from(this.operations.keys()) as [string, ...string[]]
