@@ -50,9 +50,8 @@ export async function POST(req: Request) {
 
     return result.toDataStreamResponse();
   } catch (error) {
-    console.error("Error:", error);
     return NextResponse.json(
-      { error: "An error occurred during the request" },
+      { error: `An error occurred during the request: ${error}` },
       { status: 500 }
     );
   }
