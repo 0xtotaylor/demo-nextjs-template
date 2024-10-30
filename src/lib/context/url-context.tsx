@@ -1,24 +1,16 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { useSkyfireAPIKey } from "@/lib/skyfire-sdk/context/context";
 
 interface URLContextType {
   urls: string[];
   addURL: (url: string) => void;
   clearURLs: () => void;
-  extractURLs: (text: string) => Promise<void>;
+  extractURLs: (text: string) => void;
   isExtracting: boolean;
-}
-
-interface APIResponse {
-  success: boolean;
-  urls: string[];
-  error?: string;
 }
 
 const URLContext = createContext<URLContextType | undefined>(undefined);
 
 export function URLProvider({ children }: { children: React.ReactNode }) {
-  const { localAPIKey } = useSkyfireAPIKey();
   const [urls, setUrls] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
 
@@ -33,41 +25,44 @@ export function URLProvider({ children }: { children: React.ReactNode }) {
     setUrls([]);
   }, []);
 
-  const extractURLs = useCallback(
-    async (text: string) => {
-      try {
-        setIsExtracting(true);
+  const extractURLs = useCallback((text: string) => {
+    try {
+      setIsExtracting(true);
 
-        const response = await fetch("/api/media", {
-          method: "POST",
-          headers: {
-            "skyfire-api-key": localAPIKey || "",
-          },
-          body: JSON.stringify({ text }),
-        });
+      const patterns = {
+        standardUrl:
+          /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)/gi,
 
-        const data: APIResponse = await response.json();
+        markdownUrl: /\[(?:[^\]]*)\]\((https?:\/\/[^)]+)\)/gi,
 
-        if (!response.ok) {
-          throw new Error(data.error || `Error: ${response.status}`);
+        srcUrl: /src=["'](https?:\/\/[^"']+)["']/gi,
+
+        hrefUrl: /href=["'](https?:\/\/[^"']+)["']/gi,
+      };
+
+      const extractedUrls = new Set<string>();
+
+      Object.values(patterns).forEach((pattern) => {
+        const matches = text.matchAll(pattern);
+        for (const match of matches) {
+          const url = match[1] || match[0];
+          const cleanUrl = url.replace(/[.,;:!?)]+$/, "");
+          extractedUrls.add(cleanUrl);
         }
+      });
 
-        if (!data.success) {
-          throw new Error(data.error || "Failed to extract URLs");
-        }
-
-        setUrls((prev) => {
-          const newUrls = data.urls.filter((url) => !prev.includes(url));
-          return [...prev, ...newUrls];
-        });
-      } catch (error) {
-        console.error("Error extracting URLs:", error);
-      } finally {
-        setIsExtracting(false);
-      }
-    },
-    [localAPIKey]
-  );
+      setUrls((prev) => {
+        const newUrls = Array.from(extractedUrls).filter(
+          (url) => !prev.includes(url)
+        );
+        return [...prev, ...newUrls];
+      });
+    } catch (error) {
+      console.error("Error extracting URLs:", error);
+    } finally {
+      setIsExtracting(false);
+    }
+  }, []);
 
   return (
     <URLContext.Provider

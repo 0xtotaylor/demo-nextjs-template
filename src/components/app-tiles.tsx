@@ -1,30 +1,24 @@
 "use client";
 
 import React from "react";
-import { ExternalLink, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { mimeType } from "mime-type/with-db";
+import { ExternalLink, Image as ImageIcon } from "lucide-react";
 
 import { useURLs } from "@/lib/context/url-context";
 
 export function AppTiles() {
+  const mime = mimeType;
   const { urls } = useURLs();
 
   const isImageURL = (url: string) => {
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
-    return imageExtensions.some((ext) => url.toLowerCase().endsWith(ext));
+    const mimeType = mime.lookup(url);
+    return typeof mimeType === "string" && mimeType.startsWith("image/");
   };
 
   const renderURLTiles = () => {
     if (urls.length === 0) {
-      return (
-        <>
-          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
-          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
-          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
-          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
-          <div className="aspect-square rounded-lg bg-muted/50 animate-pulse" />
-        </>
-      );
+      return null;
     }
 
     return urls.map((url) => (
