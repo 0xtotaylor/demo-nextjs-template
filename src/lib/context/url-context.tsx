@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { generateObject } from "ai";
-import { z } from "zod";
+import { useSkyfireAPIKey } from "@/lib/skyfire-sdk/context/context";
 
 interface URLContextType {
   urls: string[];
@@ -10,24 +9,16 @@ interface URLContextType {
   isExtracting: boolean;
 }
 
-const urlExtractionSchema = z.object({
-  urls: z.array(
-    z.object({
-      url: z.string().url(),
-      context: z.string().optional(),
-    })
-  ),
-});
+interface APIResponse {
+  success: boolean;
+  urls: string[];
+  error?: string;
+}
 
 const URLContext = createContext<URLContextType | undefined>(undefined);
 
-export function URLProvider({
-  children,
-  model,
-}: {
-  children: React.ReactNode;
-  model: any;
-}) {
+export function URLProvider({ children }: { children: React.ReactNode }) {
+  const { localAPIKey } = useSkyfireAPIKey();
   const [urls, setUrls] = useState<string[]>([]);
   const [isExtracting, setIsExtracting] = useState(false);
 
@@ -47,47 +38,35 @@ export function URLProvider({
       try {
         setIsExtracting(true);
 
-        const { object } = await generateObject({
-          model,
-          schema: urlExtractionSchema,
-          prompt: `Extract all URLs from the following text. Include both regular URLs and URLs from markdown links. For each URL, provide some brief context about what it links to based on the surrounding text: ${text}`,
+        const response = await fetch("/api/media", {
+          method: "POST",
+          headers: {
+            "skyfire-api-key": localAPIKey || "",
+          },
+          body: JSON.stringify({ text }),
         });
 
+        const data: APIResponse = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || `Error: ${response.status}`);
+        }
+
+        if (!data.success) {
+          throw new Error(data.error || "Failed to extract URLs");
+        }
+
         setUrls((prev) => {
-          const newUrls = object.urls
-            .map((item) => item.url)
-            .filter((url) => !prev.includes(url));
+          const newUrls = data.urls.filter((url) => !prev.includes(url));
           return [...prev, ...newUrls];
         });
       } catch (error) {
         console.error("Error extracting URLs:", error);
-
-        const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
-        const urlRegex = /(https?:\/\/[^\s\)]+)/g;
-        const extractedUrls = new Set<string>();
-
-        let match;
-        while ((match = markdownLinkRegex.exec(text)) !== null) {
-          const url = match[2];
-          extractedUrls.add(url);
-        }
-
-        const textWithoutMarkdownLinks = text.replace(markdownLinkRegex, "");
-        while ((match = urlRegex.exec(textWithoutMarkdownLinks)) !== null) {
-          extractedUrls.add(match[1]);
-        }
-
-        setUrls((prev) => {
-          const newUrls = [...extractedUrls].filter(
-            (url) => !prev.includes(url)
-          );
-          return [...prev, ...newUrls];
-        });
       } finally {
         setIsExtracting(false);
       }
     },
-    [model]
+    [localAPIKey]
   );
 
   return (

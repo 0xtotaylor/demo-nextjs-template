@@ -214,7 +214,6 @@ export default function AIChatUI({
                       );
                     }
                   } else if (tool.toolName === VerticHTTPTool.toolName) {
-                    console.log("Found Vertic tool invocation:", tool);
                     if (tool.state === "result" && tool.result) {
                       const parsedResult = JSON.parse(tool.result.content);
                       return (
