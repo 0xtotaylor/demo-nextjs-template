@@ -62,7 +62,6 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error("URL extraction error:", error);
-
     try {
       const markdownLinkRegex = /\[([^\]]+)\]\((https?:\/\/[^\s\)]+)\)/g;
       const urlRegex = /(https?:\/\/[^\s\)]+)/g;
@@ -85,12 +84,11 @@ export async function POST(req: Request) {
         urls: Array.from(extractedUrls),
       });
     } catch (error) {
-      console.error("Regex fallback error:", error);
       return NextResponse.json<APIResponse>(
         {
           success: false,
           urls: [],
-          error: "Failed to extract URLs",
+          error: `Failed to extract URLs: ${error}`,
         },
         { status: 500 }
       );
