@@ -2,10 +2,16 @@
 
 import "./skyfire-theme.css"
 import React, { useEffect, useState } from "react"
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"
 import { useChat } from "ai/react"
-import { AnimatePresence, motion } from "framer-motion"
 
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Popover,
   PopoverContent,
@@ -109,6 +115,10 @@ export default function SkyfireWidget({ tos }: SkyfireWidgetProps) {
     <div className="skyfire-theme">
       <Dialog open={isDialogOpen || !!error}>
         <DialogOverlay />
+        <VisuallyHidden.Root>
+          <DialogTitle>SkyfireWidget</DialogTitle>
+          <DialogDescription>SkyfireWidget</DialogDescription>
+        </VisuallyHidden.Root>
         <DialogContent className="skyfire-theme sm:max-w-[425px]">
           {tos ? (
             <APIKeyConfigWithTOS error={error} tos={tos} />
