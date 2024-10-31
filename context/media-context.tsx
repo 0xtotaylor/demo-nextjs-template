@@ -89,10 +89,10 @@ export function MediaProvider({ children }: { children: React.ReactNode }) {
  * @returns The URL context containing urls, addURL, clearURLs, extractURLs, and isExtracting.
  * @throws Error if used outside of a MediaProvider.
  */
-export function useURLs() {
+export function useMedia() {
   const context = useContext(MediaContext)
   if (context === undefined) {
-    throw new Error("useURLs must be used within a MediaProvider")
+    throw new Error("useMedia must be used within a MediaProvider")
   }
   return context
 }
