@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Image from "next/image"
-import { useURLs } from "@/context/media-context"
+import { useMedia } from "@/context/media-context"
 import { useChat } from "ai/react"
 import ReactMarkdown from "react-markdown"
 
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/sidebar"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { extractURLs } = useURLs()
+  const { extractURLs } = useMedia()
   const { localAPIKey } = useSkyfireAPIKey()
   const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
