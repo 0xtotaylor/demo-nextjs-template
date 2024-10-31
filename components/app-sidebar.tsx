@@ -63,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Image
-                    src="/skyfire-logo.svg"
+                    src="/skyfire.svg"
                     alt="Skyfire Logo"
                     width={24}
                     height={24}
