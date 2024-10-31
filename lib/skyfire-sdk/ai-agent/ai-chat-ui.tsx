@@ -18,7 +18,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 
 import ChatBlob from "./chat-blob"
-import { ComposeEmailTool, SendEmailTool, ShowImagesTool } from "./tools"
+import {
+  ComposeEmailTool,
+  SendEmailTool,
+  ShowImagesTool,
+  VerticHTTPTool,
+} from "./tools"
 
 interface AIChatPanelProps {
   aiChatProps: UseChatHelpers
@@ -156,15 +161,21 @@ export default function AIChatUI({
               <>
                 <ChatBlob message={message} />
                 {message.toolInvocations?.map((tool) => {
+                  const toolKey = `${message.id}-${
+                    tool.toolName
+                  }-${Math.random()}`
+
                   if (tool.toolName === ShowImagesTool.toolName) {
                     return (
                       <ShowImagesTool.ClientComponent
+                        key={toolKey}
                         images={tool.args.images}
                       />
                     )
                   } else if (tool.toolName === ComposeEmailTool.toolName) {
                     return (
                       <ComposeEmailTool.ClientComponent
+                        key={toolKey}
                         initialData={{
                           to: tool.args.to,
                           subject: tool.args.subject,
@@ -195,11 +206,24 @@ export default function AIChatUI({
                     if (tool.state === "result" && tool.result) {
                       return (
                         <SendEmailTool.ClientComponent
+                          key={toolKey}
                           result={JSON.parse(tool.result.content)}
                         />
                       )
                     }
+                  } else if (tool.toolName === VerticHTTPTool.toolName) {
+                    if (tool.state === "result" && tool.result) {
+                      const parsedResult = JSON.parse(tool.result.content)
+                      return (
+                        <VerticHTTPTool.ClientComponent
+                          key={toolKey}
+                          result={parsedResult}
+                        />
+                      )
+                    }
                   }
+
+                  return null
                 })}
               </>
             )
