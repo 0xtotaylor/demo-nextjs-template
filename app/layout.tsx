@@ -6,7 +6,6 @@ import { fontSans } from "@/lib/fonts"
 import SkyfireWidget from "@/lib/skyfire-sdk/components/skyfire-widget"
 import { SkyfireProvider } from "@/lib/skyfire-sdk/context/context"
 import { cn } from "@/lib/utils"
-import { TailwindIndicator } from "@/components/tailwind-indicator"
 import { ThemeProvider } from "@/components/theme-provider"
 
 export const metadata: Metadata = {
@@ -48,7 +47,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
                   <SkyfireWidget />
                   <div className="flex-1">{children}</div>
                 </div>
-                <TailwindIndicator />
               </>
             </SkyfireProvider>
           </ThemeProvider>
