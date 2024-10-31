@@ -17,8 +17,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { AppMedia } from "@/components/app-media"
 import { AppSidebar } from "@/components/app-sidebar"
-import { MediaTiles } from "@/components/media-tiles"
 
 export default function IndexPage() {
   const { localAPIKey } = useSkyfireAPIKey()
@@ -46,7 +46,7 @@ export default function IndexPage() {
               </Breadcrumb>
             </div>
           </header>
-          <MediaTiles />
+          <AppMedia />
         </SidebarInset>
       </SidebarProvider>
     </MediaProvider>
