@@ -22,7 +22,7 @@ import {
   ComposeEmailTool,
   SendEmailTool,
   ShowImagesTool,
-  VerticHTTPTool,
+  VetricHTTPTool,
 } from "./tools"
 
 interface AIChatPanelProps {
@@ -211,11 +211,11 @@ export default function AIChatUI({
                         />
                       )
                     }
-                  } else if (tool.toolName === VerticHTTPTool.toolName) {
+                  } else if (tool.toolName === VetricHTTPTool.toolName) {
                     if (tool.state === "result" && tool.result) {
                       const parsedResult = JSON.parse(tool.result.content)
                       return (
-                        <VerticHTTPTool.ClientComponent
+                        <VetricHTTPTool.ClientComponent
                           key={toolKey}
                           result={parsedResult}
                         />
