@@ -4,6 +4,7 @@ import * as React from "react"
 import Image from "next/image"
 import { useURLs } from "@/context/media-context"
 import { useChat } from "ai/react"
+import ReactMarkdown from "react-markdown"
 
 import { useSkyfireAPIKey } from "@/lib/skyfire-sdk/context/context"
 import { Button } from "@/components/ui/button"
@@ -89,7 +90,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   : "bg-[#0472fe] text-white"
               }`}
             >
-              {message.content}
+              <ReactMarkdown>{message.content}</ReactMarkdown>
             </div>
           ))}
           <div ref={messagesEndRef} />
