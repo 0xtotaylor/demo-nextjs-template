@@ -3,6 +3,3 @@ dist/*
 public
 node_modules
 *.esm.js
-src/components/ui/*
-src/lib/skyfire-sdk/*
-src/hooks/*
