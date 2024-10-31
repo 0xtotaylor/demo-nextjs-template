@@ -42,14 +42,15 @@ export async function POST(req: Request) {
       model: skyfireWithOpenAI("gpt-4o"),
       messages: [instruction, ...messages],
       tools,
+      maxSteps: 5,
+      temperature: 0.7,
     })
 
     // Return the streaming response
     return result.toDataStreamResponse()
   } catch (error) {
-    console.error("Error:", error)
     return NextResponse.json(
-      { error: "An error occurred during the request" },
+      { error: `An error occurred during the request: ${error}` },
       { status: 500 }
     )
   }
