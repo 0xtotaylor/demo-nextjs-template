@@ -162,21 +162,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Button
             type="submit"
             disabled={isLoading || status === "recording"}
-            className="rounded-full"
+            className="rounded-full bg-[#0C0D12] hover:bg-[#0C0D12]/90 text-white"
           >
             Send
           </Button>
           <Button
             type="button"
+            size="icon"
             onMouseDown={handleRecordingStart}
             onMouseUp={handleRecordingStop}
             onTouchStart={handleRecordingStart}
             onTouchEnd={handleRecordingStop}
             disabled={isLoading || error !== null || isTranscribing}
-            className={`rounded-full w-10 h-10 flex items-center justify-center ${
-              status === "recording"
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-gray-200 hover:bg-gray-300"
+            className={`rounded-full w-10 h-10 flex items-center justify-center bg-[#0C0D12] hover:bg-[#0C0D12]/90 text-white ${
+              status === "recording" ? "bg-red-500 hover:bg-red-600" : ""
             }`}
             title={error ? error.message : "Record audio"}
           >
