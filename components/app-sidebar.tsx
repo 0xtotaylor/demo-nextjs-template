@@ -61,13 +61,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                   <Image
                     src="/skyfire.svg"
                     alt="Skyfire Logo"
                     width={24}
                     height={24}
-                    className="size-6"
+                    className="size-6 rounded-full"
                   />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -84,7 +84,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={`rounded-lg p-3 ${
+              className={`rounded-full p-3 ${
                 message.role === "assistant"
                   ? "text-black"
                   : "bg-[#0472fe] text-white"
@@ -108,8 +108,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             value={input}
             onChange={handleInputChange}
             disabled={isLoading}
+            className="rounded-full"
           />
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="rounded-full">
             Send
           </Button>
         </form>
