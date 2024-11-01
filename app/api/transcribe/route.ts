@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
+export const dynamic = "force-dynamic"
+export const runtime = "edge"
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
@@ -15,7 +18,6 @@ export async function POST(request: NextRequest) {
     }
 
     const blob = await request.blob()
-
     const file = new File([blob], "audio.webm", { type: blob.type })
 
     const transcription = await openai.audio.transcriptions.create({
@@ -32,10 +34,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
-}
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
 }
