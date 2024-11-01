@@ -44,7 +44,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
             <SkyfireProvider>
               <>
                 <div className="relative flex min-h-screen flex-col pb-20">
-                  <SkyfireWidget />
+                  <SkyfireWidget
+                    tos={{
+                      name: siteConfig.name,
+                    }}
+                  />
                   <div className="flex-1">{children}</div>
                 </div>
               </>
